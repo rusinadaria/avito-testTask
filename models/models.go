@@ -1,5 +1,10 @@
 package models
 
+import (
+	"time"
+	"github.com/google/uuid"
+)
+
 // Token:
 //       type: string
 
@@ -27,7 +32,8 @@ const (
 )
 
 type User struct {
-	Id string `json:"id"`
+	// Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
 	Email string `json:"email"`
 	Role  Role `json:"role"`
 }
@@ -55,8 +61,10 @@ const (
 )
 
 type PVZ struct {
-	Id string `json:"id"`
-	RegistrationDate string `json:"registrationDate"`
+	// Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
+	// RegistrationDate string `json:"registrationDate"`
+	RegistrationDate time.Time `json:"registrationDate"`
 	City City `json:"city"`
 }
 
@@ -85,9 +93,12 @@ const (
 )
 
 type Reception struct {
-	Id string `json:"id"`
-	DateTime string `json:"dateTime"`
-	PvzId string `json:"pvzId"`
+	// Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
+	// DateTime string `json:"dateTime"`
+	DateTime time.Time `json:"dateTime"`
+	// PvzId string `json:"pvzId"`
+	PvzId uuid.UUID `json:"pvzId"`
 	Status Status `json:"status"`
 }
 
@@ -117,10 +128,13 @@ const (
 )
 
 type Product struct {
-	Id string `json:"id"`
-	DateTime string `json:"dateTime"`
+	// Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
+	// DateTime string `json:"dateTime"`
+	DateTime    time.Time  `json:"dateTime"`
 	Type Type `json:"type"`
-	ReceptionId string `json:"receptionId"`
+	// ReceptionId string `json:"receptionId"`
+	ReceptionId uuid.UUID  `json:"receptionId"`
 }
 
 //     Error:

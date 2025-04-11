@@ -8,7 +8,7 @@ import (
 )
 
 func ConnectDatabase(storage_path string, logger *slog.Logger) (*sql.DB, error) {
-	db, err := sql.Open("postgres", "user=postgres password=root dbname=shop sslmode=disable")
+	db, err := sql.Open("postgres", "user=postgres password=root dbname=avito_pvz sslmode=disable")
 	if err != nil {
 		log.Fatal("Failed connect database")
 		return nil, err

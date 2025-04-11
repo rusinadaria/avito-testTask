@@ -2,19 +2,33 @@ package services
 
 import (
 	"avito-testTask/internal/repository"
-	// "avito-testTask/models"
+	"avito-testTask/models"
+	"github.com/google/uuid"
 )
 
-type Auth interface {
-	CreateUser(username string, password string) (int, error)
+type PVZ interface {
+	CreatePVZ(models.PVZ) (models.PVZ, error)
+}
+
+type Reception interface {
+	CreateReception(uuid.UUID) (models.Reception, error)
+	CheckReception(pvzId uuid.UUID) (models.Reception, error)
+}
+
+type Product interface {
+	AddProduct(Type models.Type, PvzId uuid.UUID) (models.Product, error)
 }
 
 type Service struct {
-	Auth
+	PVZ
+	Reception
+	Product
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		// Auth: NewAuthService(repos.Authorization),
+		PVZ: NewPVZService(repos.PVZ),
+		Reception: NewReceptionService(repos.Reception),
+		Product: NewProductService(repos.Product),
 	}
 }
