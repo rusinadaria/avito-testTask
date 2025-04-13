@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	// "log"
 	"fmt"
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 type ProductPostgres struct {
@@ -38,4 +38,29 @@ func (r *ProductPostgres) ProductCreate(product models.Product) (models.Product,
 	}
 
 	return createdProduct, nil
+}
+
+func (r *ProductPostgres) ProductDelete(PvzId uuid.UUID) error {
+	query := `
+		DELETE FROM products
+		WHERE id = (
+			SELECT id FROM products
+			WHERE reception_id = (
+				SELECT id FROM receptions
+				WHERE pvz_id = $1
+				ORDER BY date_time DESC
+				LIMIT 1
+			)
+			ORDER BY date_time DESC
+			LIMIT 1
+		);
+	`
+	
+	_, err := r.db.Exec(query, PvzId)
+	if err != nil {
+		fmt.Println("SQL error:", err)
+		return fmt.Errorf("failed to delete Product: %w", err)
+	}
+
+	return nil
 }

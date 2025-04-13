@@ -8,7 +8,7 @@ import (
 	"avito-testTask/models"
 	"fmt"
 	"encoding/json"
-	// "github.com/go-chi/chi"
+	"github.com/go-chi/chi"
 )
 
 type RequestProduct struct {
@@ -29,7 +29,7 @@ func (h *Handler) AddProduct(w http.ResponseWriter, r *http.Request) {
 	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
 	fmt.Println(role)
 	if !ok {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: No role in context")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: Нет роли")
 		return
 	}
 
@@ -45,20 +45,59 @@ func (h *Handler) AddProduct(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated) // 201
 			json.NewEncoder(w).Encode(models.Product {Id: createdProduct.Id, DateTime: createdProduct.DateTime, Type: createdProduct.Type, ReceptionId: createdProduct.ReceptionId})
 		}
-		// При этом товар должен привязываться к последнему незакрытому приёму товаров в рамках текущего ПВЗ.
-
-		// if checkStatusLastReception(pvzId) == in_progress {
-		// 	addProduct(requestProduct)
-		// }
-
-		// Если же нет новой незакрытой приёмки товаров, то в таком случае должна возвращаться ошибка, и товар не должен добавляться в систему.
-
-		// if checkStatusLastReception == close {
-		// 	return err
-		// }
-
-
-		// Если последняя приёмка товара все ещё не была закрыта, то результатом должна стать привязка товара к текущему ПВЗ и текущей приёмке с последующем добавлением данных в хранилище.
 	}
 	// 201 + schemas/Product
+}
+
+func (h *Handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	pvzIdStr := chi.URLParam(r, "pvzId")
+	if pvzIdStr == "" {
+		http.Error(w, "pvzId not provided", http.StatusBadRequest)
+		return
+	}
+
+	pvzId, err := uuid.Parse(pvzIdStr)
+	if err != nil {
+		http.Error(w, "invalid pvzId", http.StatusBadRequest)
+		return
+	}
+
+	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
+	fmt.Println(role)
+	if !ok {
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: No role in context") // обработать
+		return
+	}
+
+	if role != models.RoleEmployee {
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: неверная роль")
+		return
+	} else {
+		// проверить на закрытие
+		// _, err := h.services.CheckReception(pvzId)
+		// if err != nil {
+		// 	common.WriteErrorResponse(w, http.StatusBadRequest, "Приемка уже закрыта")
+		// 	return
+		// } else {
+		// 	err := h.services.DeleteProduct(pvzId)
+		// 	if err != nil {
+		// 		common.WriteErrorResponse(w, http.StatusInternalServerError, "Не удалось удалить товар")
+		// 		return
+		// 	} else {
+		// 		w.WriteHeader(http.StatusOK) // 200
+		// 	}
+		// 	// w.WriteHeader(http.StatusOK) // 200
+		// }
+
+		err := h.services.DeleteProduct(pvzId)
+		if err != nil {
+			common.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		} else {
+			w.WriteHeader(http.StatusOK) // 200
+		}
+	}
+	// 200
 }

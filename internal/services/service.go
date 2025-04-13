@@ -17,6 +17,7 @@ type Reception interface {
 
 type Product interface {
 	AddProduct(Type models.Type, PvzId uuid.UUID) (models.Product, error)
+	DeleteProduct(PvzId uuid.UUID) error
 }
 
 type Service struct {
@@ -29,6 +30,6 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		PVZ: NewPVZService(repos.PVZ),
 		Reception: NewReceptionService(repos.Reception),
-		Product: NewProductService(repos.Product),
+		Product: NewProductService(repos.Product, repos.Reception),
 	}
 }

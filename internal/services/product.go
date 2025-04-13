@@ -15,11 +15,9 @@ type ProductService struct {
 	repos repository.Reception
 }
 
-func NewProductService(repo repository.Product) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(repo repository.Product, repos repository.Reception) *ProductService {
+	return &ProductService{repo: repo, repos: repos}
 }
-
-
 
 func (s *ProductService) AddProduct(Type models.Type, PvzId uuid.UUID) (models.Product, error) {
 
@@ -37,7 +35,7 @@ func (s *ProductService) AddProduct(Type models.Type, PvzId uuid.UUID) (models.P
 	} else {
 		if lastReception.Status == models.Close {
 			fmt.Println("Не удалось добавить товар, приемка закрыта")
-			return models.Product{}, err
+			return models.Product{}, fmt.Errorf("не удалось добавить товар, приемка закрыта")
 		} else {
 			var product models.Product
 			product.Id = uuid.New()
@@ -64,4 +62,28 @@ func (s *ProductService) AddProduct(Type models.Type, PvzId uuid.UUID) (models.P
 
 	// Если последняя приёмка товара все ещё не была закрыта, то результатом должна стать привязка товара к текущему ПВЗ и текущей приёмке с последующем добавлением данных в хранилище.
 
+}
+
+
+// func (s *ProductService) DeleteProduct(PvzId uuid.UUID) error {
+// 	// Удаление товаров производится по принципу LIFO, т.е. возможно удалять товары только в том порядке, в котором они были добавлены в рамках текущей приёмки.
+
+// 	// получить и удалить последний добавленный товар
+// 	err := s.repo.ProductDelete(PvzId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func (s *ProductService) DeleteProduct(pvzId uuid.UUID) error {
+	reception, err := s.repos.GetLastReceptionByPVZ(pvzId)
+	if err != nil {
+		return fmt.Errorf("не удалось получить приёмку: %w", err)
+	}
+	if reception.Status == models.Close {
+		return fmt.Errorf("приемка уже закрыта")
+	}
+
+	return s.repo.ProductDelete(pvzId)
 }

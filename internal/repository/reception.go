@@ -79,8 +79,10 @@ func (r *ReceptionPostgres) CloseReception(pvzId uuid.UUID) (models.Reception, e
 			WHERE pvz_id = $1
 			ORDER BY date_time DESC
 			LIMIT 1
-		);
+		)
+		RETURNING id, date_time, pvz_id, status;
 	`
+
 
 	var updatedReception models.Reception
 	err := r.db.QueryRow(query, pvzId).Scan(

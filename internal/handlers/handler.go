@@ -28,8 +28,10 @@ func (h *Handler) InitRoutes(logger *slog.Logger) http.Handler {
 
         r.Post("/pvz", h.PVZCreate) // Создание ПВЗ (только для модераторов)
 		r.Post("/receptions", h.Receptions) // Создание новой приемки товаров (только для сотрудников ПВЗ)
-		r.Post("/pvz/{pvzId}/close_last_reception", h.CloseReception) // Закрытие последней открытой приемки товаров в рамках ПВЗ
+		r.Post("/pvz/{pvzId}/close_last_reception", h.CloseReception) // Закрытие последней открытой приемки товаров в рамках ПВЗ (только для сотрудников ПВЗ)
 		r.Post("/products", h.AddProduct) // Добавление товара в текущую приемку (только для сотрудников ПВЗ)
+		r.Post("/pvz/{pvzId}/delete_last_product", h.DeleteProduct) // Удаление последнего добавленного товара из текущей приемки (LIFO, только для сотрудников ПВЗ)
+		r.Get("/pvz", h.GetPvz) // Получение списка ПВЗ с фильтрацией по дате приемки и пагинацией (для сотрудников и модераторов)
 		
     })
 	return r

@@ -20,6 +20,7 @@ type Reception interface {
 
 type Product interface {
 	ProductCreate(product models.Product) (models.Product, error)
+	ProductDelete(PvzId uuid.UUID) error
 }
 
 type Repository struct {
