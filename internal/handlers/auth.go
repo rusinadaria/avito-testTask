@@ -49,28 +49,15 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Authorization", "Bearer "+token)
     w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(struct { // ????????
+	json.NewEncoder(w).Encode(struct {
 		Token string `json:"token"`
 	}{
 		Token: token,
 	})
 }
 
-// const signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
-
-// type TokenClaims struct {
-// 	jwt.StandardClaims
-// 	// UserId int `json:"user_id"`
-// 	Role models.Role `json:"role"`
-// }
-
 func generateToken(role models.Role) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &middleware.TokenClaims{
-		// jwt.StandardClaims{
-		// 	ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
-		// 	IssuedAt:  time.Now().Unix(),
-		// },
-		// role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),

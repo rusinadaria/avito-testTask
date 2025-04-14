@@ -20,13 +20,6 @@ func NewProductService(repo repository.Product, repos repository.Reception) *Pro
 }
 
 func (s *ProductService) AddProduct(Type models.Type, PvzId uuid.UUID) (models.Product, error) {
-
-	// При этом товар должен привязываться к последнему незакрытому приёму товаров в рамках текущего ПВЗ.
-
-	// if checkStatusLastReception(pvzId) == in_progress {
-	// 	addProduct(requestProduct)
-	// }
-
 	// status, err := s.repo.GetLastReceptionStatus(requestProduct.PvzId)
 	lastReception, err := s.repos.GetLastReceptionByPVZ(PvzId)
 	if err != nil {
@@ -52,29 +45,7 @@ func (s *ProductService) AddProduct(Type models.Type, PvzId uuid.UUID) (models.P
 			}
 		}
 	}
-
-	// Если же нет новой незакрытой приёмки товаров, то в таком случае должна возвращаться ошибка, и товар не должен добавляться в систему.
-
-	// if checkStatusLastReception == close {
-	// 	return err
-	// }
-
-
-	// Если последняя приёмка товара все ещё не была закрыта, то результатом должна стать привязка товара к текущему ПВЗ и текущей приёмке с последующем добавлением данных в хранилище.
-
 }
-
-
-// func (s *ProductService) DeleteProduct(PvzId uuid.UUID) error {
-// 	// Удаление товаров производится по принципу LIFO, т.е. возможно удалять товары только в том порядке, в котором они были добавлены в рамках текущей приёмки.
-
-// 	// получить и удалить последний добавленный товар
-// 	err := s.repo.ProductDelete(PvzId)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 func (s *ProductService) DeleteProduct(pvzId uuid.UUID) error {
 	reception, err := s.repos.GetLastReceptionByPVZ(pvzId)

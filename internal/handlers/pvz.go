@@ -43,9 +43,6 @@ func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(models.PVZ {Id: createdPVZ.Id, RegistrationDate: createdPVZ.RegistrationDate, City: createdPVZ.City})
 		}
 	}
-
-    // w.WriteHeader(http.StatusCreated) // 201 ПВЗ создан
-	// json.NewEncoder(w).Encode(models.PVZ {Id: pvz.Id, RegistrationDate: pvz.RegistrationDate, City: pvz.City})
 }
 
 func (h *Handler) GetPvz(w http.ResponseWriter, r *http.Request) {

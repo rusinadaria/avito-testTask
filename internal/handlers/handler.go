@@ -4,7 +4,6 @@ import (
 	// "log"
 	"log/slog"
 	"github.com/go-chi/chi"
-	// "github.com/go-chi/chi/v5"
 	"avito-testTask/internal/services"
 	"net/http"
 	"avito-testTask/internal/handlers/middleware"
@@ -32,7 +31,6 @@ func (h *Handler) InitRoutes(logger *slog.Logger) http.Handler {
 		r.Post("/products", h.AddProduct) // Добавление товара в текущую приемку (только для сотрудников ПВЗ)
 		r.Post("/pvz/{pvzId}/delete_last_product", h.DeleteProduct) // Удаление последнего добавленного товара из текущей приемки (LIFO, только для сотрудников ПВЗ)
 		r.Get("/pvz", h.GetPvz) // Получение списка ПВЗ с фильтрацией по дате приемки и пагинацией (для сотрудников и модераторов)
-		
     })
 	return r
 }

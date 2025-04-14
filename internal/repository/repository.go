@@ -4,13 +4,11 @@ import (
 	"avito-testTask/models"
 	"database/sql"
 	"github.com/google/uuid"
-	// "avito-testTask/models"
 	"time"
 )
 
 type PVZ interface {
 	PVZCreate(models.PVZ) (models.PVZ, error)
-	// GetPvz() ([]models.PVZWithReceptions, error)
 	GetPvz(startDate, endDate *time.Time, limit, offset int) ([]models.PVZWithReceptions, error)
 }
 

@@ -75,22 +75,6 @@ func (h *Handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: неверная роль")
 		return
 	} else {
-		// проверить на закрытие
-		// _, err := h.services.CheckReception(pvzId)
-		// if err != nil {
-		// 	common.WriteErrorResponse(w, http.StatusBadRequest, "Приемка уже закрыта")
-		// 	return
-		// } else {
-		// 	err := h.services.DeleteProduct(pvzId)
-		// 	if err != nil {
-		// 		common.WriteErrorResponse(w, http.StatusInternalServerError, "Не удалось удалить товар")
-		// 		return
-		// 	} else {
-		// 		w.WriteHeader(http.StatusOK) // 200
-		// 	}
-		// 	// w.WriteHeader(http.StatusOK) // 200
-		// }
-
 		err := h.services.DeleteProduct(pvzId)
 		if err != nil {
 			common.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

@@ -11,7 +11,6 @@ import (
 
 type PVZ interface {
 	CreatePVZ(models.PVZ) (models.PVZ, error)
-	// GetPvzList(startDate time.Time, endDate time.Time, page int, limit int) ([]models.PVZWithReceptions, error)
 	GetPvzList(startDate *time.Time, endDate *time.Time, page int, limit int) ([]models.PVZWithReceptions, error)
 
 }

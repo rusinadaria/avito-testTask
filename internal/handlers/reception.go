@@ -46,7 +46,6 @@ func (h *Handler) Receptions(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated) // 201
 			json.NewEncoder(w).Encode(models.Reception {Id: createdReception.Id, DateTime: createdReception.DateTime, PvzId: createdReception.PvzId, Status: createdReception.Status})
 		}
-		// 201 + models.Reception
 	}
 }
 
@@ -77,7 +76,6 @@ func (h *Handler) CloseReception(w http.ResponseWriter, r *http.Request) {
 		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: неверная роль")
 		return
 	} else {
-		// проверить на закрытие
 		updatedReception, err := h.services.CheckReception(pvzId)
 		if err != nil {
 			common.WriteErrorResponse(w, http.StatusBadRequest, "Приемка уже закрыта")
@@ -87,5 +85,4 @@ func (h *Handler) CloseReception(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(models.Reception {Id: updatedReception.Id, DateTime: updatedReception.DateTime, PvzId: updatedReception.PvzId, Status: updatedReception.Status})
 		}
 	}
-	// 200 + schemas/Reception
 }
