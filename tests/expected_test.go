@@ -1,16 +1,17 @@
 package tests
 
-
 import (
-	"net/http/httptest"
-	"net/http"
-	"encoding/json"
 	"avito-testTask/models"
 	"bytes"
-	"github.com/stretchr/testify/assert"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"time"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"time"
+	"github.com/stretchr/testify/assert"
 )
 
 func (s *APITestSuite) TestAuth() {
@@ -44,7 +45,7 @@ func (s *APITestSuite) TestAuth() {
 	assert.NotEmpty(s.T(), resp.Token)
 
 	parsedToken, err := jwt.Parse(resp.Token, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+		return []byte("qrkjk#4#%35FSFJlja#4353KSFjH"), nil
 	})
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), parsedToken.Valid)
@@ -203,6 +204,7 @@ func (s *APITestSuite) TestAddProducts() {
 
 
 	token := s.getTokenWithRole("employee")
+	fmt.Println(token)
 
 	for i := 0; i < 50; i++ {
 		productRequest := RequestProduct{
