@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"net/http"
-	"avito-testTask/internal/handlers/middleware"
+	// "avito-testTask/internal/handlers/middleware"
 	"avito-testTask/internal/common"
 	"avito-testTask/models"
-	"fmt"
 	"encoding/json"
 	"strconv"
 	"time"
@@ -21,27 +20,14 @@ func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
-	fmt.Println(role)
-	if !ok {
-		h.logger.Error("Нет роли")
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
-		return
-	}
-
-	if role != models.RoleModerator {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
+	createdPVZ, err := h.services.CreatePVZ(pvz)
+	if err != nil {
+		h.logger.Error("Ошибка при создании ПВЗ")
+		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
 		return
 	} else {
-		createdPVZ, err := h.services.CreatePVZ(pvz)
-		if err != nil {
-			h.logger.Error("Ошибка при создании ПВЗ")
-			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
-        	return
-		} else {
-			w.WriteHeader(http.StatusCreated) // 201 ПВЗ создан
-			json.NewEncoder(w).Encode(models.PVZ {Id: createdPVZ.Id, RegistrationDate: createdPVZ.RegistrationDate, City: createdPVZ.City})
-		}
+		w.WriteHeader(http.StatusCreated) // 201 ПВЗ создан
+		json.NewEncoder(w).Encode(models.PVZ {Id: createdPVZ.Id, RegistrationDate: createdPVZ.RegistrationDate, City: createdPVZ.City})
 	}
 }
 

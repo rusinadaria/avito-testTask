@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	// "log"
 	"log/slog"
 	"github.com/go-chi/chi"
 	"avito-testTask/internal/services"
 	"net/http"
 	"avito-testTask/internal/handlers/middleware"
+	"avito-testTask/models"
 )
 
 type Handler struct {
@@ -26,16 +26,32 @@ func (h *Handler) InitRoutes(logger *slog.Logger) http.Handler {
 
 	r.Use(middleware.LoggerMiddlewareWrapper(logger))
 
-	r.Post("/dummyLogin", h.DummyLogin) // Получение тестового токена
+	r.Post("/dummyLogin", h.DummyLogin)
 	r.Group(func(r chi.Router) {
         r.Use(middleware.JWTMiddleware)
 
-        r.Post("/pvz", h.PVZCreate) // Создание ПВЗ (только для модераторов)
-		r.Post("/receptions", h.Receptions) // Создание новой приемки товаров (только для сотрудников ПВЗ)
-		r.Post("/pvz/{pvzId}/close_last_reception", h.CloseReception) // Закрытие последней открытой приемки товаров в рамках ПВЗ (только для сотрудников ПВЗ)
-		r.Post("/products", h.AddProduct) // Добавление товара в текущую приемку (только для сотрудников ПВЗ)
-		r.Post("/pvz/{pvzId}/delete_last_product", h.DeleteProduct) // Удаление последнего добавленного товара из текущей приемки (LIFO, только для сотрудников ПВЗ)
-		r.Get("/pvz", h.GetPvz) // Получение списка ПВЗ с фильтрацией по дате приемки и пагинацией (для сотрудников и модераторов)
+			// r.Get("/pvz", h.GetPvz)
+
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.CheckRoleMiddleware(models.RoleModerator))
+	
+				r.Post("/pvz", h.PVZCreate)
+			})
+	
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.CheckRoleMiddleware(models.RoleEmployee))
+	
+				r.Post("/receptions", h.Receptions)
+				r.Post("/pvz/{pvzId}/close_last_reception", h.CloseReception)
+				r.Post("/products", h.AddProduct)
+				r.Post("/pvz/{pvzId}/delete_last_product", h.DeleteProduct)
+			})
+	
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.CheckRoleMiddleware(models.RoleModerator, models.RoleEmployee))
+	
+				r.Get("/pvz", h.GetPvz)
+			})
     })
 	return r
 }
