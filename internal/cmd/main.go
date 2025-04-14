@@ -22,7 +22,7 @@ func main() {
 
 	repo := repository.NewRepository(db)
 	srv := services.NewService(repo)
-	handler := handlers.NewHandler(srv)
+	handler := handlers.NewHandler(srv, logger)
 
 	port := os.Getenv("PORT")
 	if port == "" {

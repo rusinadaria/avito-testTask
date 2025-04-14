@@ -11,6 +11,7 @@ import (
 	"os"
 	"github.com/golang/mock/gomock"
 	// "avito-testTask/internal/services/mocks"
+	"log/slog"
 )
 
 type APITestSuite struct {
@@ -51,9 +52,13 @@ func (s *APITestSuite) TearDownSuite() {
 }
 
 func (s *APITestSuite) initDeps() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
 	s.repos = repository.NewRepository(s.db)
 	s.services = services.NewService(s.repos)
-	s.handler = handlers.NewHandler(s.services)
+	s.handler = handlers.NewHandler(s.services, logger)
 
 	s.mockCtrl = gomock.NewController(s.T())
 	// s.mockService = mocks.NewMockService(s.mockCtrl)

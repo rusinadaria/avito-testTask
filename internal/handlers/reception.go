@@ -30,16 +30,19 @@ func (h *Handler) Receptions(w http.ResponseWriter, r *http.Request) {
 	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
 	fmt.Println(role)
 	if !ok {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: No role in context") // обработать
+		h.logger.Error("Нет роли")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
 		return
 	}
 
 	if role != models.RoleEmployee {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: неверная роль")
+		h.logger.Error("Неверная роль")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
 		return
 	} else {
 		createdReception, err := h.services.CreateReception(receptionsRequest.PvzId)
 		if err != nil {
+			h.logger.Error("Ошибка при создании Приемки")
 			common.WriteErrorResponse(w, http.StatusInternalServerError, "Ошибка при создании Приемки")
 			return
 		} else {
@@ -55,30 +58,35 @@ func (h *Handler) CloseReception(w http.ResponseWriter, r *http.Request) {
 
 	pvzIdStr := chi.URLParam(r, "pvzId")
 	if pvzIdStr == "" {
-		http.Error(w, "pvzId not provided", http.StatusBadRequest)
+		h.logger.Error("Нет параметра")
+		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
 
 	pvzId, err := uuid.Parse(pvzIdStr)
 	if err != nil {
-		http.Error(w, "invalid pvzId", http.StatusBadRequest)
+		h.logger.Error("Некорректный параметр")
+		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
 
 	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
 	fmt.Println(role)
 	if !ok {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: No role in context") // обработать
+		h.logger.Error("Нет роли")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
 		return
 	}
 
 	if role != models.RoleEmployee {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: неверная роль")
+		h.logger.Error("Неверная роль")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
 		return
 	} else {
 		updatedReception, err := h.services.CheckReception(pvzId)
 		if err != nil {
-			common.WriteErrorResponse(w, http.StatusBadRequest, "Приемка уже закрыта")
+			h.logger.Error("Приемка уже закрыта")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
 			return
 		} else {
 			w.WriteHeader(http.StatusOK) // 200

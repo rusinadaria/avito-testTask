@@ -11,12 +11,13 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	// "strings"
-		"github.com/google/uuid"
+	"github.com/google/uuid"
 	"time"
 	"fmt"
 	"context"
 	"avito-testTask/internal/handlers/middleware"
+	"log/slog"
+	"os"
 )
 
 
@@ -31,7 +32,11 @@ func TestHandler_Receptions(t *testing.T) {
 		Status:   models.InProgress,
 	}
 
-	testCases := []struct {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
+	testTable := []struct {
 		name                 string
 		inputBody            string
 		role                 models.Role
@@ -62,7 +67,7 @@ func TestHandler_Receptions(t *testing.T) {
 				// Не вызывается
 			},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name: "Bad Request - invalid JSON",
@@ -74,7 +79,7 @@ func TestHandler_Receptions(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -83,7 +88,7 @@ func TestHandler_Receptions(t *testing.T) {
 			tc.mockBehavior(mockReception, testReception.PvzId)
 
 			services := &services.Service{Reception: mockReception}
-			handler := NewHandler(services)
+			handler := NewHandler(services, logger)
 
 			r := chi.NewRouter()
 			r.With(func(next http.Handler) http.Handler {
@@ -115,7 +120,11 @@ func TestHandler_CloseReception(t *testing.T) {
 		Status:   models.InProgress,
 	}
 
-	testCases := []struct {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
+	testTable := []struct {
 		name                 string
 		pvzId                string
 		role                 models.Role
@@ -146,7 +155,7 @@ func TestHandler_CloseReception(t *testing.T) {
 				// Не вызывается
 			},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name:      "Bad Request - Reception already closed",
@@ -156,11 +165,11 @@ func TestHandler_CloseReception(t *testing.T) {
 				s.EXPECT().CheckReception(pvzId).Return(models.Reception{}, fmt.Errorf("Приемка уже закрыта"))
 			},
 			expectedStatusCode:   http.StatusBadRequest,
-			expectedResponseBody: `{"message":"Приемка уже закрыта"}`,
+			expectedResponseBody: `{"message":"Неверный запрос"}`,
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range testTable {
 		t.Run(tc.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -169,7 +178,7 @@ func TestHandler_CloseReception(t *testing.T) {
 			tc.mockBehavior(mockReception, testReception.PvzId)
 
 			services := &services.Service{Reception: mockReception}
-			handler := NewHandler(services)
+			handler := NewHandler(services, logger)
 
 			r := chi.NewRouter()
 			r.With(func(next http.Handler) http.Handler {

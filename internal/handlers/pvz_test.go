@@ -12,11 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	// "strings"
-		"github.com/google/uuid"
+	"github.com/google/uuid"
 	"time"
 	"fmt"
 	"context"
 	"avito-testTask/internal/handlers/middleware"
+	"log/slog"
+	"os"
 )
 
 func TestHandler_PVZCreate(t *testing.T) {
@@ -36,6 +38,10 @@ func TestHandler_PVZCreate(t *testing.T) {
 		RegistrationDate: fixedTime,
 		City:             models.Moscow,
 	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
 	testTable := []struct {
 		name                 string
@@ -82,7 +88,8 @@ func TestHandler_PVZCreate(t *testing.T) {
 			testCase.mockBehavior(pvzService, testPVZ)
 
 			services := &services.Service{PVZ: pvzService}
-			handler := NewHandler(services)
+
+			handler := NewHandler(services, logger)
 
 			r := chi.NewRouter()
 			r.Post("/pvz", func(w http.ResponseWriter, r *http.Request) {

@@ -11,12 +11,13 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	// "strings"
-		"github.com/google/uuid"
+	"github.com/google/uuid"
 	"time"
 	"fmt"
 	"context"
 	"avito-testTask/internal/handlers/middleware"
+	"log/slog"
+	"os"
 )
 
 func TestHandler_AddProduct(t *testing.T) {
@@ -33,6 +34,10 @@ func TestHandler_AddProduct(t *testing.T) {
 		Type:        models.Clothes,
 		ReceptionId: testReceptionId,
 	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
 	testTable := []struct {
 		name                 string
@@ -63,7 +68,7 @@ func TestHandler_AddProduct(t *testing.T) {
 			role:      models.RoleModerator,
 			mockBehavior: func(s *mock_services.MockProduct, prodType models.Type, pvzId uuid.UUID) {},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name:      "No role in context",
@@ -71,7 +76,7 @@ func TestHandler_AddProduct(t *testing.T) {
 			role:      "",
 			mockBehavior: func(s *mock_services.MockProduct, prodType models.Type, pvzId uuid.UUID) {},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name:      "Invalid JSON",
@@ -88,8 +93,8 @@ func TestHandler_AddProduct(t *testing.T) {
 			mockBehavior: func(s *mock_services.MockProduct, prodType models.Type, pvzId uuid.UUID) {
 				s.EXPECT().AddProduct(prodType, pvzId).Return(models.Product{}, fmt.Errorf("error"))
 			},
-			expectedStatusCode:   http.StatusInternalServerError,
-			expectedResponseBody: `{"message":"Не удалось добавить товар"}`,
+			expectedStatusCode:   http.StatusBadRequest,
+			expectedResponseBody: `{"message":"Неверный запрос"}`,
 		},
 	}
 
@@ -101,8 +106,8 @@ func TestHandler_AddProduct(t *testing.T) {
 			mockProduct := mock_services.NewMockProduct(ctrl)
 			testCase.mockBehavior(mockProduct, models.Clothes, testPvzId)
 
-			services := &services.Service{Product: mockProduct}
-			handler := &Handler{services: services}
+			services := &services.Service{Product: mockProduct}	
+			handler := &Handler{services: services, logger: logger}
 
 			r := chi.NewRouter()
 			r.Post("/products", func(w http.ResponseWriter, r *http.Request) {
@@ -125,6 +130,10 @@ func TestHandler_DeleteProduct(t *testing.T) {
 	type mockBehavior func(s *mock_services.MockProduct, pvzId uuid.UUID)
 
 	testPvzId := uuid.New()
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
 	testTable := []struct {
 		name                 string
@@ -150,7 +159,7 @@ func TestHandler_DeleteProduct(t *testing.T) {
 			role:       "",
 			mockBehavior: func(s *mock_services.MockProduct, pvzId uuid.UUID) {},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name:       "Forbidden: wrong role",
@@ -158,7 +167,7 @@ func TestHandler_DeleteProduct(t *testing.T) {
 			role:       models.RoleModerator,
 			mockBehavior: func(s *mock_services.MockProduct, pvzId uuid.UUID) {},
 			expectedStatusCode:   http.StatusForbidden,
-			expectedResponseBody: `{"message":"Доступ запрещен: неверная роль"}`,
+			expectedResponseBody: `{"message":"Доступ запрещен"}`,
 		},
 		{
 			name:       "DeleteProduct returns error",
@@ -182,7 +191,7 @@ func TestHandler_DeleteProduct(t *testing.T) {
 			testCase.mockBehavior(productService, testPvzIdParsed)
 
 			services := &services.Service{Product: productService}
-			handler := &Handler{services: services}
+			handler := &Handler{services: services, logger: logger}
 
 			r := chi.NewRouter()
 			r.Delete("/products/{pvzId}", func(w http.ResponseWriter, r *http.Request) {

@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-	// "github.com/go-chi/chi"
 )
 
 func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +24,8 @@ func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
 	role, ok := r.Context().Value(middleware.ContextKeyRole).(models.Role)
 	fmt.Println(role)
 	if !ok {
-		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен: No role in context") // обработать
+		h.logger.Error("Нет роли")
+		common.WriteErrorResponse(w, http.StatusForbidden, "Доступ запрещен")
 		return
 	}
 
@@ -35,8 +35,8 @@ func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
 	} else {
 		createdPVZ, err := h.services.CreatePVZ(pvz)
 		if err != nil {
-			fmt.Println("Ошибка в хэндлере при создании ПВЗ")
-			common.WriteErrorResponse(w, http.StatusInternalServerError, "Ошибка при создании ПВЗ")
+			h.logger.Error("Ошибка при создании ПВЗ")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
         	return
 		} else {
 			w.WriteHeader(http.StatusCreated) // 201 ПВЗ создан
@@ -60,16 +60,18 @@ func (h *Handler) GetPvz(w http.ResponseWriter, r *http.Request) {
 	if startDateStr != "" {
 		startDate, err = time.Parse(time.RFC3339, startDateStr)
 		if err != nil {
-			http.Error(w, "Invalid startDate format", http.StatusBadRequest)
-			return
+			h.logger.Error("Invalid startDate format")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
+        	return
 		}
 	}
 
 	if endDateStr != "" {
 		endDate, err = time.Parse(time.RFC3339, endDateStr)
 		if err != nil {
-			http.Error(w, "Invalid endDate format", http.StatusBadRequest)
-			return
+			h.logger.Error("Invalid endDate format")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
+        	return
 		}
 	}
 
@@ -90,7 +92,8 @@ func (h *Handler) GetPvz(w http.ResponseWriter, r *http.Request) {
 
 	pvzList, err := h.services.GetPvzList(&startDate, &endDate, page, limit)
 	if err != nil {
-		http.Error(w, "Failed to fetch PVZ list", http.StatusInternalServerError)
+		h.logger.Error("Ошибка при получении списка ПВЗ")
+		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
 

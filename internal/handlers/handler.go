@@ -11,10 +11,14 @@ import (
 
 type Handler struct {
 	services *services.Service
+	logger   *slog.Logger
 }
 
-func NewHandler(services *services.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(services *services.Service, logger *slog.Logger) *Handler {
+	return &Handler{
+		services: services,
+		logger:   logger,
+	}
 }
 
 func (h *Handler) InitRoutes(logger *slog.Logger) http.Handler {

@@ -25,7 +25,8 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
     }
 
 	if role.Role != models.RoleEmployee && role.Role != models.RoleModerator {
-		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос") // Недопустимая роль
+		h.logger.Error("Недопустимая роль")
+		common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
         return
 	}
 
@@ -34,16 +35,16 @@ func (h *Handler) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	if role.Role == models.RoleEmployee {
 		token, err = generateToken(models.RoleEmployee)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode("Не удалось сгенерировать токен") // обработать
-			return
+			h.logger.Error("Не удалось сгенерировать токен")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
+        	return
 		}
 	} else {
 		token, err = generateToken(models.RoleModerator)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode("Не удалось сгенерировать токен") // обработать
-			return
+			h.logger.Error("Не удалось сгенерировать токен")
+			common.WriteErrorResponse(w, http.StatusBadRequest, "Неверный запрос")
+        	return
 		}
 	}
 
