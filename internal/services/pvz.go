@@ -4,7 +4,7 @@ import (
 	"avito-testTask/internal/repository"
 	"avito-testTask/models"
 	"fmt"
-	// "time"
+	"time"
 )
 
 type PVZService struct {
@@ -23,4 +23,13 @@ func (s *PVZService) CreatePVZ(pvz models.PVZ) (models.PVZ, error) {
 		return models.PVZ{}, err
 	}
 	return pvz, nil
+}
+
+func (s *PVZService) GetPvzList(startDate *time.Time, endDate *time.Time, page int, limit int) ([]models.PVZWithReceptions, error) {
+	pvzList, err := s.repo.GetPvz(startDate, endDate, limit, page)
+	if err != nil {
+		fmt.Println("Ошибка в сервисе при создании ПВЗ")
+		return []models.PVZWithReceptions{}, err
+	}
+	return pvzList, nil
 }

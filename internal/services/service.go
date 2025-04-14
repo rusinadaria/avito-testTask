@@ -4,10 +4,16 @@ import (
 	"avito-testTask/internal/repository"
 	"avito-testTask/models"
 	"github.com/google/uuid"
+	"time"
 )
+
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type PVZ interface {
 	CreatePVZ(models.PVZ) (models.PVZ, error)
+	// GetPvzList(startDate time.Time, endDate time.Time, page int, limit int) ([]models.PVZWithReceptions, error)
+	GetPvzList(startDate *time.Time, endDate *time.Time, page int, limit int) ([]models.PVZWithReceptions, error)
+
 }
 
 type Reception interface {

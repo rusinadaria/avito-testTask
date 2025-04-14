@@ -7,8 +7,9 @@ import (
 	"avito-testTask/models"
 	"fmt"
 	"encoding/json"
-	// "strconv"
-	// "time"
+	"strconv"
+	"time"
+	// "github.com/go-chi/chi"
 )
 
 func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
@@ -48,5 +49,54 @@ func (h *Handler) PVZCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetPvz(w http.ResponseWriter, r *http.Request) {
-	
+	startDateStr := r.URL.Query().Get("startDate")
+	endDateStr := r.URL.Query().Get("endDate")
+	pageStr := r.URL.Query().Get("page")
+	limitStr := r.URL.Query().Get("limit")
+
+	var (
+		startDate time.Time
+		endDate   time.Time
+		err       error
+	)
+
+	if startDateStr != "" {
+		startDate, err = time.Parse(time.RFC3339, startDateStr)
+		if err != nil {
+			http.Error(w, "Invalid startDate format", http.StatusBadRequest)
+			return
+		}
+	}
+
+	if endDateStr != "" {
+		endDate, err = time.Parse(time.RFC3339, endDateStr)
+		if err != nil {
+			http.Error(w, "Invalid endDate format", http.StatusBadRequest)
+			return
+		}
+	}
+
+	page := 1
+	limit := 10
+
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 30 {
+			limit = l
+		}
+	}
+
+	pvzList, err := h.services.GetPvzList(&startDate, &endDate, page, limit)
+	if err != nil {
+		http.Error(w, "Failed to fetch PVZ list", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(pvzList)
 }
