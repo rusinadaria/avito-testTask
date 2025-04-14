@@ -20,8 +20,9 @@ func NewHandler(services *services.Service) *Handler {
 func (h *Handler) InitRoutes(logger *slog.Logger) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/dummyLogin", h.DummyLogin) // Получение тестового токена
+	r.Use(middleware.LoggerMiddlewareWrapper(logger))
 
+	r.Post("/dummyLogin", h.DummyLogin) // Получение тестового токена
 	r.Group(func(r chi.Router) {
         r.Use(middleware.JWTMiddleware)
 
