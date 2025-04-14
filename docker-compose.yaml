@@ -4,8 +4,16 @@ services:
   avito-pvz-service:
       build: .
       container_name: avito-pvz-service
-      env_file:
-      - .env
+      # env_file:
+      # - .env
+      environment:
+        - DATABASE_PORT=5432
+        - DATABASE_USER=postgres
+        - DATABASE_PASSWORD=root
+        - DATABASE_NAME=avito_pvz
+        - DATABASE_HOST=db
+
+        - SERVER_PORT=8080
       ports:
         - "8080:8080"
       depends_on:
